@@ -1,21 +1,23 @@
-open util/boolean 
+module laboratorio
 
 sig lcc {
-	computadores : set computador
+	computadores: set Computador
 }
 
+sig Computador {}
+sig ComputadorQuebrado in Computador {}
 
-sig computador{
-	isBroken : one Bool
-}
-
-fact lccNumber{
+fact constants {
 	#lcc = 2
+	#Computador = 20
 }
-fact numComputadores {
+
+fact {
+	all c: Computador | one c.~computadores
 	all lab: lcc | #(lab.computadores) = 10
 }
 
-pred show(){}
+pred show[]{
+}
 
-run show for 10
+run show for 28
