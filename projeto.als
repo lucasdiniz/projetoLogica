@@ -15,6 +15,8 @@ fact constants {
 fact {
 	all c: Computador | one c.~computadores
 	all lab: lcc | #(lab.computadores) = 10
+
+	all lab: lcc | #(lab.computadores & ComputadorQuebrado) < 3
 }
 
 pred show[]{
