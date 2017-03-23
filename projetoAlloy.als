@@ -6,9 +6,11 @@ sig lcc {
 	computadores: set Computador
 }
 
-sig Computador {
+abstract sig Computador {
 	alunos : set Aluno
 }
+
+sig ComputadorFuncionando extends Computador {}
 
 abstract sig ComputadorQuebrado extends Computador {}
 sig ComputadorEmReparo extends ComputadorQuebrado {}
