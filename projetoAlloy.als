@@ -21,7 +21,7 @@ fact constants {
 }
 
 fact {
-	all c: Computador | one c.~computadores
+	all c: Computador | lone c.~computadores
 	all a: Aluno | lone a.~alunos
 	all lab: lcc | #(lab.computadores) = 10
 	all lab: lcc | #(lab.computadores & ComputadorQuebrado) < 3
