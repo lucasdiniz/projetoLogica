@@ -9,9 +9,12 @@ sig lcc {
 sig Computador {
 	alunos : set Aluno
 }
-sig ComputadorQuebrado in Computador {}
 
-sig Aluno {}
+abstract sig ComputadorQuebrado extends Computador {}
+sig ComputadorEmReparo extends ComputadorQuebrado {}
+sig ComputadorAguardandoReparo extends ComputadorQuebrado {}
+
+sig Aluno {} 
 sig CursoComputacao {
 	alunosMatriculados : set Aluno
 }
@@ -49,7 +52,7 @@ assert testeAlunosMatriculadosNosComputadores {
 }
 ----------------------CHECKS----------------------
 
-check testeComputadoresQuebrados
+//check testeComputadoresQuebrados
 
 pred show[]{
 }
