@@ -41,9 +41,12 @@ fact aluno {
 ----------------------ASSERTS----------------------
 
 assert testeComputadoresQuebrados {
-	#ComputadorQuebrado <= 4
+	all lab: lcc | #(lab.computadores & ComputadorQuebrado) <= 2
 }
 
+assert testeAlunosMatriculadosNosComputadores {
+	all c: Computador | one curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+}
 ----------------------CHECKS----------------------
 
 check testeComputadoresQuebrados
