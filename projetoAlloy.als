@@ -1,43 +1,54 @@
 module laboratorio
 
-
-------------------------------ASSINATURAS------------------------------
+----------------------ASSINATURAS----------------------
 
 sig lcc {
 	computadores: set Computador
 }
 
-sig Computador {alunos : set Aluno}
+sig Computador {
+	alunos : set Aluno
+}
 sig ComputadorQuebrado in Computador {}
 
-sig Aluno{}
-sig CursoComputacao{alunosMatriculados : set Aluno}
+sig Aluno {}
+sig CursoComputacao {
+	alunosMatriculados : set Aluno
+}
 
-------------------------------FATOS------------------------------
+-----------------------FATOS-----------------------
+
 fact constants {
 	#lcc = 2
 	#Computador = 20
 	#CursoComputacao = 1
 }
 
-fact {
-	all c: Computador | lone c.~computadores
-	all a: Aluno | lone a.~alunos
+fact computadoresQuebrados {
+	all c: Computador | one c.~computadores
 	all lab: lcc | #(lab.computadores) = 10
-	all lab: lcc | #(lab.computadores & ComputadorQuebrado) < 3
-	all c: ComputadorQuebrado | #c.alunos = 0
-	all c: Computador | #c.alunos <= 2
-	all c: Computador | one curso: CursoComputacao | c.alunos in curso.alunosMatriculados
-} 
+	all lab: lcc | #(lab.computadores & ComputadorQuebrado) <= 2
+}
 
-------------------------------PREDICADOS(no minimo 3)------------------------------
+fact aluno {
+	all a: Aluno | lone a.~alunos
+	all a: Aluno | lone a.~alunosMatriculados
+	all c: Computador | #c.alunos <= 2
+	all c: ComputadorQuebrado | #c.alunos = 0
+	all c: Computador | one curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+}
+
+----------------------ASSERTS----------------------
+
+assert testeComputadoresQuebrados {
+	#ComputadorQuebrado <= 4
+}
+
+----------------------CHECKS----------------------
+
+check testeComputadoresQuebrados
 
 pred show[]{
 }
 
-------------------------------FUNÇÕES(no minimo 3)------------------------------
-
-------------------------------ASSERTS(no minimo 3)------------------------------
-
-------------------------------CHECKS(rodar os asserts aqui)------------------------------
 run show for 30
