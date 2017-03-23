@@ -35,7 +35,7 @@ fact aluno {
 	all a: Aluno | lone a.~alunosMatriculados
 	all c: Computador | #c.alunos <= 2
 	all c: ComputadorQuebrado | #c.alunos = 0
-	all c: Computador | one curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
 ----------------------ASSERTS----------------------
