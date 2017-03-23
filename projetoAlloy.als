@@ -37,7 +37,7 @@ fact aluno {
 	all a: Aluno | lone a.~alunos
 	all a: Aluno | lone a.~alunosMatriculados
 	all c: Computador | #c.alunos <= 2
-	all c: ComputadorQuebrado | #c.alunos = 0
+	all c: ComputadorAguardandoReparo | #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
@@ -49,6 +49,10 @@ assert testeComputadoresQuebrados {
 
 assert testeAlunosMatriculadosNosComputadores {
 	all c: Computador | one curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+}
+
+assert testeComputadorQuebradoSemAluno {
+	all c: ComputadorAguardandoReparo | #c.alunos = 0
 }
 ----------------------CHECKS----------------------
 
