@@ -52,8 +52,12 @@ fact aluno {
 fact traces {
 	init[first]
 	all pre: Time-last | let pos = pre.next |
-		some lab : lcc, c : Computador |
-			addComputador[lab, c, pre, pos]
+		some lab : lcc, c : Computador, a:Aluno |
+			addAluno[c, a, pre, pos] and
+			computadorQuebrou[lab, c, pre, pos] and
+			aguardarReparo[lab, c, pre, pos] and
+			iniciarReparo[lab, c, pre, pos] and
+			reparaComputador[lab, c, pre, pos]
 }
 
 ----------------------FUNÇÕES----------------------
@@ -89,17 +93,43 @@ assert testeComputadorQuebradoSemAluno {
 //check testeComputadoresQuebrados
 
 pred init[t:Time]	{
-	no (lcc.computadores).t
+	all lab: lcc | (#lab.computadoresFuncionais).t = 10
+	all c:Computador | no (c.alunos).t
+}	
+
+pred addAlunoComputador[c:Computador, a:Aluno,  t, t': Time] {
+	a !in (c.alunos).t
+	(c.alunos).t' = (c.alunos).t + a 
 }
 
-pred consertaComputador[lab:lcc, c:Computador, t, t' : Time] {
+pred computadorQuebrou[lab:lcc, c:Computador, t, t' : Time] {
+	c in (lab.computadoresFuncionais).t
+	c !in (lab.computadoresQuebrados).t
+	(lab.computadoresFuncionais).t' = (lab.computadoresFuncionais).t - c
+	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t + c
+}
+
+pred aguardarReparo[lab:lcc, c:Computador, t, t' : Time] {
 	c in (lab.computadoresQuebrados).t
-	c !in (lab.computadoresFuncionais).t
-	(lab.computadoresFuncionais).t' = (lab.computadoresFuncionais).t + c
+	c !in (lab.computadoresAguardandoReparo).t
+	(lab.computadoresAguardandoReparo).t' = (lab.computadoresQuebrados).t + c
 	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
 }
 
-pred show[]{
+pred iniciarReparo [lab:lcc, c.Computador, t, t' : Time] {
+	c in (lab.computadoresAguardandoReparo).t
+	c !in (lab.computadoresReparo).t
+	(lab.computadoresReparo).t' = (lab.computadoresReparo).t + c
+	(lab.computadoresAguardandoReparo).t' = (lab.computadoresAguardandoReparo).t - c
 }
+
+pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
+	c in (lab.computadoresReparo).t
+	c !in (lab.computadoresFuncionais).t
+	(lab.computadoresFuncionais).t' = (lab.computadoresReparo).t + c
+	(lab.computadoresReparo).t' = (lab.computadoresFuncionais).t - c
+}
+
+pred show[]{}
 
 run show
