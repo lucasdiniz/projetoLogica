@@ -1,6 +1,9 @@
 module laboratorio
 
+open util/ordering[Time]
 ----------------------ASSINATURAS----------------------
+
+sig Time {}
 
 sig lcc {
 	computadores: set Computador
@@ -41,6 +44,20 @@ fact aluno {
 	all c: Computador | #c.alunos <= 2
 	all c: ComputadorAguardandoReparo | #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+}
+
+----------------------FUNÇÕES----------------------
+
+fun getAlunosMatriculados [cc: CursoComputacao] : set Aluno {
+	(cc.alunosMatriculados)
+}
+
+fun getTodosComputadores [lab: lcc] : set Computador {
+	(lab.computadores)
+}
+
+fun getComputadoresQuebrados [lab: lcc] : set Computador {
+	(lab.computadores & ComputadorQuebrado)
 }
 
 ----------------------ASSERTS----------------------
