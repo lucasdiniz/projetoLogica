@@ -35,7 +35,8 @@ fact constants {
 
 fact computadoresQuebrados {
 	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
-	all lab: lcc, t: Time| #todosComputadoresLab[lab, t] = 10
+	all lab: lcc, t: Time | #((lcc.computadoresFuncionais).t & ComputadorQuebrado) = 0
+	all lab: lcc, t: Time | #todosComputadoresLab[lab, t] = 10
 	all lab: lcc, t: Time | #computadoresQuebradosLab[lab, t] <= 2
 	all lab: lcc, t: Time | #computadoresEmReparoLab[lab, t] <= 2
 }
