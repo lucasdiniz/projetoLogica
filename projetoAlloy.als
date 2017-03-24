@@ -8,38 +8,34 @@ sig Time {}
 
 sig lcc {
 	computadoresFuncionais: set Computador -> Time,
-	computadoresQuebrados: set ComputadorQuebrado -> Time,
-	computadoresEmReparo: set ComputadorQuebrado -> Time
+	computadoresQuebrados: set Computador -> Time,
+	computadoresEmReparo: set Computador -> Time
 }
 
 sig Computador {
 	alunos : set Aluno -> Time
 }
 
-sig ComputadorQuebrado in Computador {}
-
 sig Aluno {}
 
-sig CursoComputacao {
+abstract sig Curso {
 	alunosMatriculados : set Aluno -> Time
 }
 
+sig CursoComputacao extends Curso{}
 -----------------------FATOS-----------------------
 
 fact constants {
 	#lcc = 2
 	#Computador = 20
-	#ComputadorQuebrado <= 4
 	#CursoComputacao = 1
 }
 
 fact computadoresQuebrados {
 	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
 	some lab: lcc, t: Time, c: Computador | (c in (lab. computadoresFuncionais).t) or (c in (lab.computadoresQuebrados).t) or (c in (lab.computadoresEmReparo).t)
-    --all lab:lcc, t: Time, c: ComputadorQuebrado | c not in (lab.computadoresFuncionais).t and c in (lab.computadoresQuebrados + lab.computadoresEmReparo).t
 	all lab: lcc, t: Time | #todosComputadoresLab[lab, t] = 10
-	all lab: lcc, t: Time | #computadoresQuebradosLab[lab, t] <= 2
-	all lab: lcc, t: Time | #computadoresEmReparoLab[lab, t] <= 2
+	all lab: lcc, t: Time | #computadoresInativos[lab, t] <= 2
 }
 
 fact aluno {
@@ -53,7 +49,7 @@ fact traces {
 	init[first]
 	all pre: Time-last | let pos = pre.next |
 		some lab : lcc,c : Computador, a:Aluno |
-			addAlunoComputador[c, a, pre, pos]  and
+			addAlunoComputador[c, a, pre, pos]  or
 			computadorQuebrou[lab, c, pre, pos] or
 			iniciarReparo[lab, c, pre, pos]     or
 			reparaComputador[lab, c, pre, pos]
@@ -77,6 +73,10 @@ fun computadoresEmReparoLab [lab: lcc, t: Time] : set Computador {
 	(lab.computadoresEmReparo).t
 }
 
+fun computadoresInativos [lab:lcc, t:Time] : set Computador {
+	(lab.computadoresQuebrados + lab.computadoresEmReparo).t
+}
+
 ----------------------ASSERTS----------------------
 
 assert testeComputadoresQuebrados {
@@ -97,7 +97,7 @@ pred init[t:Time]	{
 	all lab: lcc | #(lab.computadoresFuncionais).t = 10
 	all c:Computador | no (c.alunos).t
 	all lab:lcc | #(lab.computadoresQuebrados + lab.computadoresEmReparo).t = 0
-	all lab:lcc, c:ComputadorQuebrado | c not in (lab.computadoresFuncionais).t
+	--all lab:lcc, c:ComputadorQuebrado | c not in (lab.computadoresFuncionais).t
 }	
 
 pred addAlunoComputador[c:Computador, a:Aluno,  t, t': Time] {
@@ -108,6 +108,7 @@ pred addAlunoComputador[c:Computador, a:Aluno,  t, t': Time] {
 pred computadorQuebrou[lab:lcc, c:Computador, t, t' : Time] {
 	c in (lab.computadoresFuncionais).t
 	c !in (lab.computadoresQuebrados).t
+	c !in (lab.computadoresEmReparo).t
 	(lab.computadoresFuncionais).t' = (lab.computadoresFuncionais).t - c
 	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t + c
 }
@@ -115,6 +116,7 @@ pred computadorQuebrou[lab:lcc, c:Computador, t, t' : Time] {
 pred iniciarReparo[lab:lcc, c:Computador, t, t' : Time] {
  	c in (lab.computadoresQuebrados).t
  	c !in (lab.computadoresEmReparo).t
+	c !in (lab.computadoresFuncionais).t
 	(lab.computadoresEmReparo).t' = (lab.computadoresEmReparo).t + c
  	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
  }
@@ -122,8 +124,9 @@ pred iniciarReparo[lab:lcc, c:Computador, t, t' : Time] {
 pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
 	c in (lab.computadoresEmReparo).t
 	c !in (lab.computadoresFuncionais).t
-	(lab.computadoresFuncionais).t' = (lab.computadoresEmReparo).t + c
-	(lab.computadoresEmReparo).t' = (lab.computadoresFuncionais).t - c
+	c !in (lab.computadoresQuebrados).t
+	(lab.computadoresFuncionais).t' = (lab.computadoresFuncionais).t + c
+	(lab.computadoresEmReparo).t' = (lab.computadoresEmReparo).t - c
 }
 
 pred show[]{}
