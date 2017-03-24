@@ -45,20 +45,20 @@ fact computadoresQuebrados {
 fact aluno {
 	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t)
 	all c: Computador | #c.alunos <= 2
-	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) and #c.alunos = 0
-	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
+	//all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
-fact traces {
-	init[first]
-	all pre: Time-last | let pos = pre.next |
-		some lab : lcc, c : Computador, a:Aluno |
-			addAlunoComputador[c, a, pre, pos] and
-			computadorQuebrou[lab, c, pre, pos] and
-			aguardarReparo[lab, c, pre, pos] and
-			iniciarReparo[lab, c, pre, pos] and
-			reparaComputador[lab, c, pre, pos]
-}
+--fact traces {
+	--init[first]
+	--all pre: Time-last | let pos = pre.next |
+		--some c : Computador, a:Aluno |
+			--addAlunoComputador[c, a, pre, pos] --and
+			--computadorQuebrou[lab, c, pre, pos] --and
+			--aguardarReparo[lab, c, pre, pos] --and
+			--iniciarReparo[lab, c, pre, pos] --and
+			--reparaComputador[lab, c, pre, pos]
+--}
 
 ----------------------FUNÇÕES----------------------
 
@@ -132,4 +132,4 @@ pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
 
 pred show[]{}
 
-run show
+run show for 20
