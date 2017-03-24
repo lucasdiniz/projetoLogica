@@ -6,10 +6,9 @@ open util/ordering[Time]
 sig Time {}
 
 sig lcc {
-	computadoresFuncionais: set Computador -> Time
-	computadoresQuebrados: set Computador -> Time
+	computadoresFuncionais: set Computador -> Time,
+	computadoresQuebrados: set Computador -> Time,
 	computadoresReparo: set Computador -> Time
-	computadoresAguardandoReparo: set Computador -> Time	
 }
 
 --abstract sig Computador {
@@ -25,7 +24,7 @@ sig Computador {
 
 sig Aluno {} 
 sig CursoComputacao {
-	alunosMatriculados : set Aluno
+	alunosMatriculados : set Aluno -> Time
 }
 
 -----------------------FATOS-----------------------
@@ -62,17 +61,16 @@ fact traces {
 
 ----------------------FUNÇÕES----------------------
 
-fun getAlunosMatriculados [cc: CursoComputacao] : set Aluno {
-	(cc.alunosMatriculados)
+fun getAlunosMatriculados [cc: CursoComputacao, t: Time] : set Aluno {
+	(cc.alunosMatriculados).t
 }
 
-fun getTodosComputadores [lab: lcc] : set Computador -> Time {
-	(lab.computadores)
+fun getTodosComputadores [lab: lcc, t: Time] : set Computador {
+	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresReparo + lab.computadoresReparo).t
 }
 
-fun getComputadoresQuebrados [lab: lcc] : set Computador {
-	--(lab.computadores & ComputadorQuebrado)
-	lab.computadoresQuebrados
+fun getComputadoresQuebrados [lab: lcc, t: Time] : set Computador {
+	(lab.computadoresQuebrados).t
 }
 
 ----------------------ASSERTS----------------------
@@ -116,7 +114,7 @@ pred aguardarReparo[lab:lcc, c:Computador, t, t' : Time] {
 	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
 }
 
-pred iniciarReparo [lab:lcc, c.Computador, t, t' : Time] {
+pred iniciarReparo [lab:lcc, c: Computador, t, t' : Time] {
 	c in (lab.computadoresAguardandoReparo).t
 	c !in (lab.computadoresReparo).t
 	(lab.computadoresReparo).t' = (lab.computadoresReparo).t + c
