@@ -109,12 +109,12 @@ pred computadorQuebrou[lab:lcc, c:Computador, t, t' : Time] {
 	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t + c
 }
 
---pred aguardarReparo[lab:lcc, c:Computador, t, t' : Time] {
---	c in (lab.computadoresQuebrados).t
---	c !in (lab.computadoresAguardandoReparo).t
---	(lab.computadoresAguardandoReparo).t' = (lab.computadoresQuebrados).t + c
---	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
---}
+pred iniciarReparo[lab:lcc, c:Computador, t, t' : Time] {
+	c in (lab.computadoresQuebrados).t
+	c !in (lab.computadoresEmReparo).t
+	(lab.computadoresEmReparo).t' = (lab.computadoresEmReparo).t + c
+	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
+}
 
 --pred iniciarReparo [lab:lcc, c: Computador, t, t' : Time] {
 --	c in (lab.computadoresAguardandoReparo).t
