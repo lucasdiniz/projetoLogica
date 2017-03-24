@@ -35,6 +35,7 @@ fact computadoresQuebrados {
 	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
 	some lab: lcc, t: Time, c: Computador | (c in (lab. computadoresFuncionais).t) or (c in (lab.computadoresQuebrados).t) or (c in (lab.computadoresEmReparo).t)
 	all lab: lcc, c: Computador, t: Time | c in (lab.computadoresQuebrados + lab.computadoresEmReparo).t => c !in lab.computadoresFuncionais.t
+	all lab: lcc, c: Computador, t: Time | c in (lab.computadoresQuebrados).t  => c !in lab.computadoresFuncionais.t and c !in lab.computadoresEmReparo.t
 	all lab: lcc, t: Time | #todosComputadoresLab[lab, t] = 10
 	all lab: lcc, t: Time | #computadoresInativos[lab, t] <= 2
 }
