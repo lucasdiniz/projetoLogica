@@ -34,10 +34,10 @@ fact constants {
 }
 
 fact computadoresQuebrados {
-	all lab: lcc, t: Time | #(ComputadorQuebrado & (lab.computadoresFuncionais).t) = 0
-	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
-	all lab: lcc, t: Time | #getTodosComputadores[lab, t] = 10
-	all lab: lcc, t: Time | #getComputadoresQuebrados[lab, t] <= 2
+	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresReparo + computadoresAguardandoReparo).t)
+	all lab: lcc, t: Time| #todosComputadoresLab[lab, t] = 10
+	all lab: lcc, t: Time | #computadoresQuebradosLab[lab, t] <= 2
+	all lab: lcc, t: Time | #computadoresEmReparoLab[lab, t] <= 2
 }
 
 fact aluno {
@@ -61,22 +61,26 @@ fact traces {
 
 ----------------------FUNÇÕES----------------------
 
-fun getAlunosMatriculados [cc: CursoComputacao, t: Time] : set Aluno {
+fun alunosMatriculadosCurso [cc: CursoComputacao, t: Time] : set Aluno {
 	(cc.alunosMatriculados).t
 }
 
-fun getTodosComputadores [lab: lcc, t: Time] : set Computador {
-	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresEmReparo).t
+fun todosComputadoresLab [lab: lcc, t: Time] : set Computador {
+	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresReparo + lab.computadoresReparo).t
 }
 
-fun getComputadoresQuebrados [lab: lcc, t: Time] : set Computador {
+fun computadoresQuebradosLab [lab: lcc, t: Time] : set Computador {
 	(lab.computadoresQuebrados).t
+}
+
+fun computadoresEmReparoLab [lab: lcc, t: Time] : set Computador {
+	(lab.computadoresReparo).t
 }
 
 ----------------------ASSERTS----------------------
 
 assert testeComputadoresQuebrados {
-	all lab: lcc, t: Time | #getComputadoresQuebrados[lab, t] <= 2
+	all lab: lcc, t: Time | #computadoresQuebradosLab[lab, t] <= 2
 }
 
 assert testeAlunosMatriculadosNosComputadores {
