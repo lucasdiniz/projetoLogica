@@ -8,12 +8,13 @@ sig Time {}
 sig lcc {
 	computadoresFuncionais: set Computador -> Time,
 	computadoresQuebrados: set Computador -> Time,
-	computadoresReparo: set Computador -> Time
+	computadoresReparo: set Computador -> Time,
+	computadoresAguardandoReparo: set Computador -> Time
 }
 
 --abstract sig Computador {
 sig Computador {
-	alunos : set Aluno
+	alunos : set Aluno -> Time
 }
 
 --sig ComputadorFuncionando extends Computador {}
@@ -36,15 +37,15 @@ fact constants {
 }
 
 fact computadoresQuebrados {
-	all c: Computador | one c.~computadores
-	all lab: lcc | #(lab.computadores) = 10
-	all lab: lcc | #(lab.computadores & ComputadorQuebrado) <= 2
+	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresReparo + computadoresAguardandoReparo).t)
+	all lab: lcc | #getTodosComputadores[lab] = 10
+	all lab: lcc | #getComputadoresQuebrados[lab] <= 2
 }
 
 fact aluno {
-	all a: Aluno | lone a.~alunos	all a: Aluno | lone a.~alunosMatriculados
+	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t)
 	all c: Computador | #c.alunos <= 2
-	all c: ComputadorAguardandoReparo | #c.alunos = 0
+	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) and #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
@@ -52,7 +53,7 @@ fact traces {
 	init[first]
 	all pre: Time-last | let pos = pre.next |
 		some lab : lcc, c : Computador, a:Aluno |
-			addAluno[c, a, pre, pos] and
+			addAlunoComputador[c, a, pre, pos] and
 			computadorQuebrou[lab, c, pre, pos] and
 			aguardarReparo[lab, c, pre, pos] and
 			iniciarReparo[lab, c, pre, pos] and
@@ -65,33 +66,34 @@ fun getAlunosMatriculados [cc: CursoComputacao, t: Time] : set Aluno {
 	(cc.alunosMatriculados).t
 }
 
-fun getTodosComputadores [lab: lcc, t: Time] : set Computador {
-	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresReparo + lab.computadoresReparo).t
+fun getTodosComputadores [lab: lcc] : set Computador -> Time {
+	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresReparo + lab.computadoresReparo)
 }
 
-fun getComputadoresQuebrados [lab: lcc, t: Time] : set Computador {
-	(lab.computadoresQuebrados).t
+fun getComputadoresQuebrados [lab: lcc] : set Computador -> Time {
+	(lab.computadoresQuebrados)
 }
 
 ----------------------ASSERTS----------------------
 
 assert testeComputadoresQuebrados {
-	all lab: lcc | #(lab.computadores & ComputadorQuebrado) <= 2
+	all lab: lcc | #getComputadoresQuebrados[lab] <= 2
 }
 
 assert testeAlunosMatriculadosNosComputadores {
-	all c: Computador | one curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+	all c: Computador, curso: CursoComputacao, t: Time | #((c.alunos).t & (curso.alunosMatriculados).t) = #(c.alunos).t
 }
 
 assert testeComputadorQuebradoSemAluno {
-	all c: ComputadorAguardandoReparo | #c.alunos = 0
+	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) and #c.alunos = 0
 }
+
 ----------------------CHECKS----------------------
 
 //check testeComputadoresQuebrados
 
 pred init[t:Time]	{
-	all lab: lcc | (#lab.computadoresFuncionais).t = 10
+	all lab: lcc | #(lab.computadoresFuncionais).t = 10
 	all c:Computador | no (c.alunos).t
 }	
 
