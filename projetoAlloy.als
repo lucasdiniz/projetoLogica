@@ -36,6 +36,7 @@ fact computadoresQuebrados {
 	some lab: lcc, t: Time, c: Computador | (c in (lab. computadoresFuncionais).t) or (c in (lab.computadoresQuebrados).t) or (c in (lab.computadoresEmReparo).t)
 	all lab: lcc, c: Computador, t: Time | c in (lab.computadoresQuebrados + lab.computadoresEmReparo).t => c !in lab.computadoresFuncionais.t
 	all lab: lcc, c: Computador, t: Time | c in (lab.computadoresQuebrados).t  => c !in lab.computadoresFuncionais.t and c !in lab.computadoresEmReparo.t
+	all t': Time, c:Computador, lab: lcc | c in (lab.computadoresEmReparo).t' => some t: t'.^prev | c in (lab.computadoresQuebrados).t 
 	all lab: lcc, t: Time | #todosComputadoresLab[lab, t] = 10
 	all lab: lcc, t: Time | #computadoresInativos[lab, t] <= 2
 }
@@ -45,7 +46,8 @@ fact aluno {
 	all c: Computador, t: Time | #(c.alunos).t <= 2
 	--all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
-    all t': Time, c:Computador, lab: lcc | c in (lab.computadoresEmReparo).t' => some t: t'.^prev | c in (lab.computadoresQuebrados).t 
+    all t': Time, a:Aluno, c:Computador, cc:CursoComputacao | a in (c.alunos).t' => some t: t'.^prev | a !in (c.alunos).t and a in (cc.alunosMatriculados).t
+    
 }
 
 fact traces {
