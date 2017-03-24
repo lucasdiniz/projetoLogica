@@ -1,29 +1,25 @@
 module laboratorio
 
 open util/ordering[Time]
+
 ----------------------ASSINATURAS----------------------
 
 sig Time {}
 
 sig lcc {
 	computadoresFuncionais: set Computador -> Time,
-	computadoresQuebrados: set Computador -> Time,
-	computadoresReparo: set Computador -> Time,
-	computadoresAguardandoReparo: set Computador -> Time
+	computadoresQuebrados: set ComputadorQuebrado -> Time,
+	computadoresEmReparo: set ComputadorQuebrado -> Time
 }
 
---abstract sig Computador {
 sig Computador {
 	alunos : set Aluno -> Time
 }
 
---sig ComputadorFuncionando extends Computador {}
+sig ComputadorQuebrado in Computador {}
 
---abstract sig ComputadorQuebrado extends Computador {}
---sig ComputadorEmReparo extends ComputadorQuebrado {}
---sig ComputadorAguardandoReparo extends ComputadorQuebrado {}
+sig Aluno {}
 
-sig Aluno {} 
 sig CursoComputacao {
 	alunosMatriculados : set Aluno -> Time
 }
@@ -33,19 +29,22 @@ sig CursoComputacao {
 fact constants {
 	#lcc = 2
 	#Computador = 20
+	#ComputadorQuebrado <= 4
 	#CursoComputacao = 1
 }
 
 fact computadoresQuebrados {
-	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresReparo + computadoresAguardandoReparo).t)
-	all lab: lcc | #getTodosComputadores[lab] = 10
-	all lab: lcc | #getComputadoresQuebrados[lab] <= 2
+	all lab: lcc, t: Time | #(ComputadorQuebrado & (lab.computadoresFuncionais).t) = 0
+	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
+	all lab: lcc, t: Time | #getTodosComputadores[lab, t] = 10
+	all lab: lcc, t: Time | #getComputadoresQuebrados[lab, t] <= 2
 }
 
 fact aluno {
 	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t)
 	all c: Computador | #c.alunos <= 2
-	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
+	all a: Aluno, t: Time | lone a.~(alunos.t)
+	--all lab: lcc, c: Computador, t: Time | c in (lab.computadoresAguardandoReparo).t => #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
@@ -53,10 +52,10 @@ fact traces {
 	init[first]
 	all pre: Time-last | let pos = pre.next |
 		some lab : lcc,c : Computador, a:Aluno |
-			addAlunoComputador[c, a, pre, pos] or
-			computadorQuebrou[lab, c, pre, pos]  or
-			aguardarReparo[lab, c, pre, pos]  or
-			iniciarReparo[lab, c, pre, pos]  or
+			addAlunoComputador[c, a, pre, pos]  or
+			computadorQuebrou[lab, c, pre, pos] or
+--			aguardarReparo[lab, c, pre, pos]    or
+--			iniciarReparo[lab, c, pre, pos]     or
 			reparaComputador[lab, c, pre, pos]
 }
 
@@ -66,18 +65,18 @@ fun getAlunosMatriculados [cc: CursoComputacao, t: Time] : set Aluno {
 	(cc.alunosMatriculados).t
 }
 
-fun getTodosComputadores [lab: lcc] : set Computador -> Time {
-	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresReparo + lab.computadoresReparo)
+fun getTodosComputadores [lab: lcc, t: Time] : set Computador {
+	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresEmReparo).t
 }
 
-fun getComputadoresQuebrados [lab: lcc] : set Computador -> Time {
-	(lab.computadoresQuebrados)
+fun getComputadoresQuebrados [lab: lcc, t: Time] : set Computador {
+	(lab.computadoresQuebrados).t
 }
 
 ----------------------ASSERTS----------------------
 
 assert testeComputadoresQuebrados {
-	all lab: lcc | #getComputadoresQuebrados[lab] <= 2
+	all lab: lcc, t: Time | #getComputadoresQuebrados[lab, t] <= 2
 }
 
 assert testeAlunosMatriculadosNosComputadores {
@@ -85,12 +84,10 @@ assert testeAlunosMatriculadosNosComputadores {
 }
 
 assert testeComputadorQuebradoSemAluno {
-	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) and #c.alunos = 0
+--	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) and #c.alunos = 0
 }
 
-----------------------CHECKS----------------------
-
-//check testeComputadoresQuebrados
+----------------------PREDICADOS-------------------
 
 pred init[t:Time]	{
 	all lab: lcc | #(lab.computadoresFuncionais).t = 10
@@ -109,27 +106,27 @@ pred computadorQuebrou[lab:lcc, c:Computador, t, t' : Time] {
 	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t + c
 }
 
-pred aguardarReparo[lab:lcc, c:Computador, t, t' : Time] {
-	c in (lab.computadoresQuebrados).t
-	c !in (lab.computadoresAguardandoReparo).t
-	(lab.computadoresAguardandoReparo).t' = (lab.computadoresQuebrados).t + c
-	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
-}
+--pred aguardarReparo[lab:lcc, c:Computador, t, t' : Time] {
+--	c in (lab.computadoresQuebrados).t
+--	c !in (lab.computadoresAguardandoReparo).t
+--	(lab.computadoresAguardandoReparo).t' = (lab.computadoresQuebrados).t + c
+--	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
+--}
 
-pred iniciarReparo [lab:lcc, c: Computador, t, t' : Time] {
-	c in (lab.computadoresAguardandoReparo).t
-	c !in (lab.computadoresReparo).t
-	(lab.computadoresReparo).t' = (lab.computadoresReparo).t + c
-	(lab.computadoresAguardandoReparo).t' = (lab.computadoresAguardandoReparo).t - c
-}
+--pred iniciarReparo [lab:lcc, c: Computador, t, t' : Time] {
+--	c in (lab.computadoresAguardandoReparo).t
+--	c !in (lab.computadoresReparo).t
+--	(lab.computadoresReparo).t' = (lab.computadoresReparo).t + c
+--	(lab.computadoresAguardandoReparo).t' = (lab.computadoresAguardandoReparo).t - c
+--}
 
 pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
-	c in (lab.computadoresReparo).t
+	c in (lab.computadoresEmReparo).t
 	c !in (lab.computadoresFuncionais).t
-	(lab.computadoresFuncionais).t' = (lab.computadoresReparo).t + c
-	(lab.computadoresReparo).t' = (lab.computadoresFuncionais).t - c
+	(lab.computadoresFuncionais).t' = (lab.computadoresEmReparo).t + c
+	(lab.computadoresEmReparo).t' = (lab.computadoresFuncionais).t - c
 }
 
 pred show[]{}
 
-run show for 5 but exactly 20 Computador
+run show for 10 but exactly 20 Computador
