@@ -46,7 +46,7 @@ fact aluno {
 	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t)
 	all c: Computador | #c.alunos <= 2
 	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
-	//all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
+	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
 --fact traces {
@@ -132,4 +132,4 @@ pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
 
 pred show[]{}
 
-run show for 20
+run show for 3 but exactly 20 Computador
