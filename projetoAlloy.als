@@ -41,10 +41,9 @@ fact computadoresQuebrados {
 }
 
 fact aluno {
-	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t)
-	all c: Computador | #c.alunos <= 2
-	all a: Aluno, t: Time | lone a.~(alunos.t)
-	--all lab: lcc, c: Computador, t: Time | c in (lab.computadoresAguardandoReparo).t => #c.alunos = 0
+	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t) and lone a.~(alunos.t)
+	all c: Computador, t: Time | #(c.alunos).t <= 2
+	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
