@@ -35,7 +35,8 @@ fact constants {
 
 fact computadoresQuebrados {
 	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
-	all lab: lcc, t: Time | #((lcc.computadoresFuncionais).t & ComputadorQuebrado) = 0
+	some lab: lcc, t: Time, c: Computador | (c in (lab. computadoresFuncionais).t) or (c in (lab.computadoresQuebrados).t) or (c in (lab.computadoresEmReparo).t)
+    --all lab:lcc, t: Time, c: ComputadorQuebrado | c not in (lab.computadoresFuncionais).t and c in (lab.computadoresQuebrados + lab.computadoresEmReparo).t
 	all lab: lcc, t: Time | #todosComputadoresLab[lab, t] = 10
 	all lab: lcc, t: Time | #computadoresQuebradosLab[lab, t] <= 2
 	all lab: lcc, t: Time | #computadoresEmReparoLab[lab, t] <= 2
@@ -52,10 +53,9 @@ fact traces {
 	init[first]
 	all pre: Time-last | let pos = pre.next |
 		some lab : lcc,c : Computador, a:Aluno |
-			addAlunoComputador[c, a, pre, pos]  or
+			addAlunoComputador[c, a, pre, pos]  and
 			computadorQuebrou[lab, c, pre, pos] or
---			aguardarReparo[lab, c, pre, pos]    or
---			iniciarReparo[lab, c, pre, pos]     or
+			iniciarReparo[lab, c, pre, pos]     or
 			reparaComputador[lab, c, pre, pos]
 }
 
@@ -96,6 +96,8 @@ assert testeComputadorQuebradoSemAluno {
 pred init[t:Time]	{
 	all lab: lcc | #(lab.computadoresFuncionais).t = 10
 	all c:Computador | no (c.alunos).t
+	all lab:lcc | #(lab.computadoresQuebrados + lab.computadoresEmReparo).t = 0
+	all lab:lcc, c:ComputadorQuebrado | c not in (lab.computadoresFuncionais).t
 }	
 
 pred addAlunoComputador[c:Computador, a:Aluno,  t, t': Time] {
@@ -111,18 +113,11 @@ pred computadorQuebrou[lab:lcc, c:Computador, t, t' : Time] {
 }
 
 pred iniciarReparo[lab:lcc, c:Computador, t, t' : Time] {
-	c in (lab.computadoresQuebrados).t
-	c !in (lab.computadoresEmReparo).t
+ 	c in (lab.computadoresQuebrados).t
+ 	c !in (lab.computadoresEmReparo).t
 	(lab.computadoresEmReparo).t' = (lab.computadoresEmReparo).t + c
-	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
-}
-
---pred iniciarReparo [lab:lcc, c: Computador, t, t' : Time] {
---	c in (lab.computadoresAguardandoReparo).t
---	c !in (lab.computadoresReparo).t
---	(lab.computadoresReparo).t' = (lab.computadoresReparo).t + c
---	(lab.computadoresAguardandoReparo).t' = (lab.computadoresAguardandoReparo).t - c
---}
+ 	(lab.computadoresQuebrados).t' = (lab.computadoresQuebrados).t - c
+ }
 
 pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
 	c in (lab.computadoresEmReparo).t
