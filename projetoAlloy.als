@@ -49,16 +49,16 @@ fact aluno {
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
---fact traces {
-	--init[first]
-	--all pre: Time-last | let pos = pre.next |
-		--some c : Computador, a:Aluno |
-			--addAlunoComputador[c, a, pre, pos] --and
-			--computadorQuebrou[lab, c, pre, pos] --and
+fact traces {
+	init[first]
+	all pre: Time-last | let pos = pre.next |
+		some lab : lcc,c : Computador, a:Aluno |
+			addAlunoComputador[c, a, pre, pos] and
+			computadorQuebrou[lab, c, pre, pos] --and
 			--aguardarReparo[lab, c, pre, pos] --and
 			--iniciarReparo[lab, c, pre, pos] --and
 			--reparaComputador[lab, c, pre, pos]
---}
+}
 
 ----------------------FUNÇÕES----------------------
 
