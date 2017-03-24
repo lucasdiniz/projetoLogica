@@ -34,7 +34,7 @@ fact constants {
 }
 
 fact computadoresQuebrados {
-	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresReparo + computadoresAguardandoReparo).t)
+	all c: Computador, t: Time | one c.~((computadoresFuncionais + computadoresQuebrados + computadoresEmReparo).t)
 	all lab: lcc, t: Time| #todosComputadoresLab[lab, t] = 10
 	all lab: lcc, t: Time | #computadoresQuebradosLab[lab, t] <= 2
 	all lab: lcc, t: Time | #computadoresEmReparoLab[lab, t] <= 2
@@ -43,7 +43,7 @@ fact computadoresQuebrados {
 fact aluno {
 	all a: Aluno, t: Time | lone a.~(alunosMatriculados.t) and lone a.~(alunos.t)
 	all c: Computador, t: Time | #(c.alunos).t <= 2
-	all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
+	--all lab: lcc, c: Computador, t: Time | c in t.~(lab.computadoresAguardandoReparo) => #c.alunos = 0
 	all c: Computador, curso: CursoComputacao | c.alunos in curso.alunosMatriculados
 }
 
@@ -65,7 +65,7 @@ fun alunosMatriculadosCurso [cc: CursoComputacao, t: Time] : set Aluno {
 }
 
 fun todosComputadoresLab [lab: lcc, t: Time] : set Computador {
-	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresReparo + lab.computadoresReparo).t
+	(lab.computadoresFuncionais + lab.computadoresQuebrados + lab.computadoresEmReparo).t
 }
 
 fun computadoresQuebradosLab [lab: lcc, t: Time] : set Computador {
@@ -73,7 +73,7 @@ fun computadoresQuebradosLab [lab: lcc, t: Time] : set Computador {
 }
 
 fun computadoresEmReparoLab [lab: lcc, t: Time] : set Computador {
-	(lab.computadoresReparo).t
+	(lab.computadoresEmReparo).t
 }
 
 ----------------------ASSERTS----------------------
