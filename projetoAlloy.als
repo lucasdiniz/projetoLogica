@@ -53,11 +53,11 @@ fact traces {
 	init[first]
 	all pre: Time-last | let pos = pre.next |
 		some lab : lcc,c : Computador, a:Aluno |
-			addAlunoComputador[c, a, pre, pos] and
-			computadorQuebrou[lab, c, pre, pos] --and
-			--aguardarReparo[lab, c, pre, pos] --and
-			--iniciarReparo[lab, c, pre, pos] --and
-			--reparaComputador[lab, c, pre, pos]
+			addAlunoComputador[c, a, pre, pos] or
+			computadorQuebrou[lab, c, pre, pos]  or
+			aguardarReparo[lab, c, pre, pos]  or
+			iniciarReparo[lab, c, pre, pos]  or
+			reparaComputador[lab, c, pre, pos]
 }
 
 ----------------------FUNÇÕES----------------------
@@ -132,4 +132,4 @@ pred reparaComputador[lab:lcc, c:Computador, t, t' : Time] {
 
 pred show[]{}
 
-run show for 3 but exactly 20 Computador
+run show for 5 but exactly 20 Computador
